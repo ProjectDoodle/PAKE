@@ -16,10 +16,10 @@ client_socket.connect(('127.0.0.1',port))
 
 #recieve connection message from server
 recv_msg = client_socket.recv(1024)
-print recv_msg
+print(recv_msg)
 
 #send user details to server
-send_msg = raw_input("Enter your user name(prefix with #):")
+send_msg = input("Enter your user name(prefix with #):")
 client_socket.send(send_msg)
 
 
@@ -27,8 +27,8 @@ client_socket.send(send_msg)
 
 while True:
     recv_msg = client_socket.recv(1024)
-    print recv_msg
-    send_msg = raw_input("Send your message in format [@user:message] ")
+    print(recv_msg)
+    send_msg = input("Send your message in format [@user:message] ")
     if send_msg == 'exit':
         break;
     else:
