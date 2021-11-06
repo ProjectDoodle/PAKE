@@ -16,4 +16,5 @@ Steps for running the sample Chat application:
 3. Repeat step 2 for other users. (Maximum 5 users is allowed with server configuration i.e. server_socket.listen(5)
 
 # References
-* Chat application implementation stems from: https://codinginfinite.com/python-chat-application-tutorial-source-code/
+* [Chat application implementation]( https://codinginfinite.com/python-chat-application-tutorial-source-code/)
+* [PAKE Wiki](http://cryptowiki.net/index.php?title=Password-authenticated_key_agreement)
