@@ -12,33 +12,95 @@ Steps from Source:
 9. Exit i.e. end the communication by terminating the connection
 """
 
-import socket,select
+import socket
+import select
 
+# Setting up the server
+IP = "127.0.0.1"
 port = 12345
+# Header holds the length of the message
+HEADER_LENGTH = 10
+# List of sockets (i.e. socket information for each client)
 socket_list = []
+# List of connected users (Key: socket name, Value: user data)
 users = {}
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-server_socket.bind(('',port))
+server_socket.bind((IP,port))
 server_socket.listen(5)
 socket_list.append(server_socket)
+
+def rec_msg(client_socket):
+    try:
+        # Grabbing message header
+        message_header = client_socket.recv(HEADER_LENGTH)
+        
+        # If empty, exit
+        if not (len(message_header)):
+            return False
+        
+        # Grabbing message length as int
+        message_length = int(message_header.decode("utf-8").strip())
+        # Return dictionary containing message information
+        return {"header": message_header, "data": client_socket.recv(message_header)}
+
+    # Catching an error where clients message is not properly received
+    except:
+       return False
+
+# Server actions
 while True:
+    # List of ready to read, ready to write, and exception sockets
     ready_to_read,ready_to_write,in_error = select.select(socket_list,[],[],0)
     for sock in ready_to_read:
+        # Someone just connected
         if sock == server_socket:
-            connect, addr = server_socket.accept()
-            socket_list.append(connect)
-            connect.send("You are connected from:" + str(addr))
+            # Bringing in the client connetion
+            client_socket, client_address = server_socket.accept()
+
+            user = rec_msg(client_socket)
+            # Someone disconnected
+            if user is False:
+                    continue
+
+            socket_list.append(client_socket)
+            
+            # Adding user to users dictionary, with socket as key
+            users[client_socket] = user
+            print(f"Accepted new connection from {client_address[0]}:{client_address[1]} username:{user['data'].decode('utf-8')}")
+            client_socket.send("You are connected from:" + str(client_address))
         else:
             try:
-                data = sock.recv(2048)
-                if data.startswith("#"):
-                    users[data[1:].lower()]=connect
+                message = rec_msg(sock)
+                #data = sock.recv(2048)
+                if message is False:
+                    print(f"Closed connection from {users[sock]['data'].decode('utf-8')}")
+                    socket_list.remove(sock)
+                    del users[sock]
+                    continue
+                """
+                elif message.startswith("#"):
+                    users[data[1:].lower()]=client_socket
                     print("User " + data[1:] +" added.")
-                    connect.send("Your user detail saved as : "+str(data[1:]))
-                elif data.startswith("@"):
+                    client_socket.send("Your user detail saved as : "+str(data[1:]))
+                elif message.startswith("@"):
                     users[data[1:data.index(':')].lower()].send(data[data.index(':')+1:])
+                """
+                
+                user = users[sock]
+                #username = user['data'].decode('utf-8')
+                print(f"Received message from {user['data'].decode('utf-8')}: {message['data'].decode('utf-8')}")
+                
+                # Share message with everybody
+                for client_socket in users:
+                    # Don't want to send message back to sender
+                    if client_socket != sock:
+                        client_socket.send(['header'] + user['data'] + message['header'] + message['data'])
             except:
                 continue
+
+    for sock in in_error:
+       socket_list.remove(sock)
+       del users[sock] 
 
 server_socket.close()

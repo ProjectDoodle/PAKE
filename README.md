@@ -15,6 +15,13 @@ Steps for running the sample Chat application:
 	b) Now, send the message to a user by following the format @username:message. Example: @bob:Hello, Bob! This is alice
 3. Repeat step 2 for other users. (Maximum 5 users is allowed with server configuration i.e. server_socket.listen(5)
 
+# To-Do
+1. Finish chat app implementation
+2. Apply DH-EKE to messages
+3. Apply "some" cryptanalysis on messages
+
+Make sure to view messages at each stage. We can demo what is viewable at from non-encrypted chat app -> DH -> DH-EKE.
+
 # References
 * [Chat application implementation]( https://codinginfinite.com/python-chat-application-tutorial-source-code/)
 * [PAKE Wiki](http://cryptowiki.net/index.php?title=Password-authenticated_key_agreement)
