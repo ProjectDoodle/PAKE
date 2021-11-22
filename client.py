@@ -72,7 +72,7 @@ while True:
             
     except IOError as e:
         # Errors we might see depending on OS when there are no more messages to recieve
-        if e.errno != errno.EAGAIN or e.errno != errno.EWOULDBLOCK:
+        if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK:
             print('Reading error', str(e))
             sys.exit()
         continue

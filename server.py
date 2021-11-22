@@ -17,19 +17,24 @@ import select
 
 # Setting up the server
 IP = "127.0.0.1"
-port = 12345
+PORT = 12345
 # Header holds the length of the message
 HEADER_LENGTH = 10
 # List of sockets (i.e. socket information for each client)
-socket_list = []
 # List of connected users (Key: socket name, Value: user data)
-users = {}
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-server_socket.bind((IP,port))
-server_socket.listen(5)
-socket_list.append(server_socket)
+server_socket.bind((IP,PORT))
+server_socket.listen()
 
+socket_list = {}
+socket_list.append(server_socket)
+users = {}
+
+
+print(f"Listening for connections on {IP}:{PORT}...")
+
+# Handles receiving messages
 def rec_msg(client_socket):
     try:
         # Grabbing message header
@@ -42,7 +47,7 @@ def rec_msg(client_socket):
         # Grabbing message length as int
         message_length = int(message_header.decode("utf-8").strip())
         # Return dictionary containing message information
-        return {"header": message_header, "data": client_socket.recv(message_header)}
+        return {"header": message_header, "data": client_socket.recv(message_length)}
 
     # Catching an error where clients message is not properly received
     except:
@@ -51,7 +56,8 @@ def rec_msg(client_socket):
 # Server actions
 while True:
     # List of ready to read, ready to write, and exception sockets
-    ready_to_read,ready_to_write,in_error = select.select(socket_list,[],[],0)
+    #ready_to_read,ready_to_write,in_error = select.select(socket_list,[],[],0)
+    ready_to_read,ready_to_write,in_error = select.select(socket_list,[], socket_list)
     for sock in ready_to_read:
         # Someone just connected
         if sock == server_socket:
@@ -68,7 +74,7 @@ while True:
             # Adding user to users dictionary, with socket as key
             users[client_socket] = user
             print(f"Accepted new connection from {client_address[0]}:{client_address[1]} username:{user['data'].decode('utf-8')}")
-            client_socket.send("You are connected from:" + str(client_address))
+            #client_socket.send(f"You are connected from: {client_address}")
         else:
             try:
                 message = rec_msg(sock)
@@ -92,11 +98,13 @@ while True:
                 print(f"Received message from {user['data'].decode('utf-8')}: {message['data'].decode('utf-8')}")
                 
                 # Share message with everybody
-                for client_socket in users:
+                for c_sock in users:
                     # Don't want to send message back to sender
-                    if client_socket != sock:
-                        client_socket.send(['header'] + user['data'] + message['header'] + message['data'])
-            except:
+                    if c_sock != sock:
+                        print("DO YOU SEE ME?")
+                        c_sock.send(['header'] + user['data'] + message['header'] + message['data'])
+            except Exception as e:
+                print('Error', str(e))
                 continue
 
     for sock in in_error:
