@@ -20,6 +20,11 @@ Steps for running the sample Chat application:
 2. Apply DH-EKE to messages
 3. Apply "some" cryptanalysis on messages
 
+# Questions:
+1. Is DH used to generate a key between each client and the server? Or is it just used for key generation between clients?
+2. Why is the server not broadcasting the message a client sends? But also, does it matter? If DH is used between the client and
+   server, then we can just work with that.
+
 Make sure to view messages at each stage. We can demo what is viewable at from non-encrypted chat app -> DH -> DH-EKE.
 
 # References

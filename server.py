@@ -84,6 +84,7 @@ while True:
                     socket_list.remove(sock)
                     del users[sock]
                     continue
+
                 """
                 elif message.startswith("#"):
                     users[data[1:].lower()]=client_socket
@@ -103,6 +104,7 @@ while True:
                     if c_sock != sock:
                         print("DO YOU SEE ME?")
                         c_sock.send(['header'] + user['data'] + message['header'] + message['data'])
+
             except Exception as e:
                 print('Error', str(e))
                 continue
