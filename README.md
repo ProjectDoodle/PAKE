@@ -16,9 +16,11 @@ Steps for running the sample Chat application:
 3. Repeat step 2 for other users. (Maximum 5 users is allowed with server configuration i.e. server_socket.listen(5)
 
 # To-Do
-1. Finish chat app implementation
-2. Apply DH-EKE to messages
-3. Apply "some" cryptanalysis on messages
+1. Finish chat app implementation and print out communication for demonstration
+2. Apply DH and print out communication for demonstration
+3. Potentially create GUI for chat app
+4. Apply DH-EKE and print out communication for demonstration
+5. Potentially apply "some" cryptanalysis on messages
 
 # Questions:
 1. Is DH used to generate a key between each client and the server? Or is it just used for key generation between clients?
