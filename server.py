@@ -27,7 +27,7 @@ server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server_socket.bind((IP,PORT))
 server_socket.listen()
 
-socket_list = {}
+socket_list = []
 socket_list.append(server_socket)
 users = {}
 
@@ -35,7 +35,7 @@ users = {}
 print(f"Listening for connections on {IP}:{PORT}...")
 
 # Handles receiving messages
-def rec_msg(client_socket):
+def recv_msg(client_socket):
     try:
         # Grabbing message header
         message_header = client_socket.recv(HEADER_LENGTH)
@@ -64,7 +64,7 @@ while True:
             # Bringing in the client connetion
             client_socket, client_address = server_socket.accept()
 
-            user = rec_msg(client_socket)
+            user = recv_msg(client_socket)
             # Someone disconnected
             if user is False:
                     continue
@@ -73,11 +73,11 @@ while True:
             
             # Adding user to users dictionary, with socket as key
             users[client_socket] = user
-            print(f"Accepted new connection from {client_address[0]}:{client_address[1]} username:{user['data'].decode('utf-8')}")
+            print(f"Accepted new connection from {client_address[0]}:{client_address[1]} username: {user['data'].decode('utf-8')}")
             #client_socket.send(f"You are connected from: {client_address}")
         else:
             try:
-                message = rec_msg(sock)
+                message = recv_msg(sock)
                 #data = sock.recv(2048)
                 if message is False:
                     print(f"Closed connection from {users[sock]['data'].decode('utf-8')}")
@@ -103,7 +103,7 @@ while True:
                     # Don't want to send message back to sender
                     if c_sock != sock:
                         print("DO YOU SEE ME?")
-                        c_sock.send(['header'] + user['data'] + message['header'] + message['data'])
+                        c_sock.send(user['header'] + user['data'] + message['header'] + message['data'])
 
             except Exception as e:
                 print('Error', str(e))

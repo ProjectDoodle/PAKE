@@ -61,12 +61,12 @@ while True:
 
             # Grabbing username
             username_length = int(username_header.decode('utf-8').strip())
-            username = client_socket.recv(username_length.decode('utf-8'))
+            username = client_socket.recv(username_length).decode('utf-8')
             
             # Grabbing message
             message_header = client_socket.recv(HEADER_LENGTH)
             message_length = int(message_header.decode('utf-8').strip())
-            message = client_socket.recv(username_length.decode('utf-8'))
+            message = client_socket.recv(message_length).decode('utf-8')
 
             print(f"{username} > {message}")
             
