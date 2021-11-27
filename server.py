@@ -100,7 +100,6 @@ while True:
             #print("Sending prime to client")
             #client_socket.send((f"Prime {prime} and generator {generator} received from server: ".encode('utf-8')))
 
-
             socket_list.append(client_socket)
             
             # Adding user to users dictionary, with socket as key
