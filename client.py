@@ -12,38 +12,53 @@ import socket
 import select
 import errno
 import sys
+import json
 
 HEADER_LENGTH = 10
 IP = "127.0.0.1"
 PORT = 12345
+client_secret = 5
 
 my_username = input("Username: ")
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #client_socket = socket.socket()
 client_socket.connect((IP, PORT))
+
+# Receiving DH variables
+step1 = client_socket.recv(1024)
+#print("Test")
+
+# Parsing DH variables
+jsonData = json.loads(step1.decode())
+jsonData = jsonData["dh-keyexchange"]
+generator = int(jsonData["generator"])
+prime = int(jsonData["prime"])
+serverA = int(jsonData["serverA"])
+
+#print(f"Generator {generator}, prime {prime}, serverA {serverA}")
+
+# Calculating client shared secret
+clientB = (pow(generator, client_secret)) % prime
+
+# Sending back to server
+step2 = "{"
+step2 += "\"dh-keyexchange\":"
+step2 += "{"
+step2 += "\"step\": {},".format(2)
+step2 += "\"clientB\": {}".format(clientB)
+step2 += "}}"
+client_socket.send(step2.encode())
+
+# Calculating shared secret
+sharedSecret = pow(serverA, client_secret) % prime
+#print("Client secret: " + str(sharedSecret))
+
 # Receive shouldn't block
 client_socket.setblocking(False)
 
 username = my_username.encode('utf-8')
 username_header = f"{len(username):<{HEADER_LENGTH}}".encode('utf-8')
 client_socket.send(username_header + username)
-
-
-"""
-#recieve connection message from server
-recv_msg = client_socket.recv(1024)
-print(recv_msg)
-
-#send user details to server
-send_msg = input("Enter your user name(prefix with #):")
-client_socket.send(send_msg)
-
-
-#receive and send message from/to different user/s
-"""
-
-step1 = client_socket.recv(1024)
-print("Test")
 
 while True:
     message = input(f"{my_username} > ")
@@ -52,10 +67,6 @@ while True:
     if message:
         message = message.encode('utf-8')
         message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
-
-        # Waiting for the server to send DH variables for key generation
-        #while True:
-        #print(client_socket.recv(4096).decode('utf-8'))
         
         # Send message
         client_socket.send(message_header + message)
@@ -90,15 +101,5 @@ while True:
     except Exception as e:
         print('Error', str(e))
         sys.exit()
-
-    """
-    recv_msg = client_socket.recv(1024)
-    print(recv_msg)
-    send_msg = input("Send your message in format [@user:message] ")
-    if send_msg == 'exit':
-        break;
-    else:
-        client_socket.send(send_msg)
-    """
 
 client_socket.close()

@@ -14,6 +14,7 @@ Steps from Source:
 
 import socket
 import select
+import json
 
 # Setting up the server
 IP = "127.0.0.1"
@@ -74,12 +75,23 @@ while True:
             step1 += "\"dh-keyexchange\":"
             step1 += "{"
             step1 += "\"step\": {},".format(1)
-            step1 += "\"base\": {},".format(generator)
+            step1 += "\"generator\": {},".format(generator)
             step1 += "\"prime\": {},".format(prime)
-            step1 += "\"publicSecret\": {}".format(serverA)
+            step1 += "\"serverA\": {}".format(serverA)
             step1 += "}}"
             client_socket.send(step1.encode())
+            
+            step2 = client_socket.recv(1024)
+            
+            jsonData = json.loads(step2.decode())
+            jsonData = jsonData["dh-keyexchange"]
+            
+            clientB = int(jsonData["clientB"])
+            
+            sharedSecret = pow(clientB, server_secret) % prime
            
+            #print("Server secret: " + str(sharedSecret))
+
             user = recv_msg(client_socket)
             # Someone disconnected
             if user is False:
@@ -104,15 +116,6 @@ while True:
                     socket_list.remove(sock)
                     del users[sock]
                     continue
-
-                """
-                elif message.startswith("#"):
-                    users[data[1:].lower()]=client_socket
-                    print("User " + data[1:] +" added.")
-                    client_socket.send("Your user detail saved as : "+str(data[1:]))
-                elif message.startswith("@"):
-                    users[data[1:data.index(':')].lower()].send(data[data.index(':')+1:])
-                """
                 
                 user = users[sock]
                 #username = user['data'].decode('utf-8')
