@@ -31,6 +31,12 @@ socket_list = []
 socket_list.append(server_socket)
 users = {}
 
+# DH variables
+server_secret = 4
+prime = 23
+generator = 9
+serverA = (pow(generator, server_secret)) % prime
+
 
 print(f"Listening for connections on {IP}:{PORT}...")
 
@@ -64,10 +70,24 @@ while True:
             # Bringing in the client connetion
             client_socket, client_address = server_socket.accept()
 
+            step1 = "{"
+            step1 += "\"dh-keyexchange\":"
+            step1 += "{"
+            step1 += "\"step\": {},".format(1)
+            step1 += "\"base\": {},".format(generator)
+            step1 += "\"prime\": {},".format(prime)
+            step1 += "\"publicSecret\": {}".format(serverA)
+            step1 += "}}"
+            client_socket.send(step1.encode())
+           
             user = recv_msg(client_socket)
             # Someone disconnected
             if user is False:
                     continue
+
+            #print("Sending prime to client")
+            #client_socket.send((f"Prime {prime} and generator {generator} received from server: ".encode('utf-8')))
+
 
             socket_list.append(client_socket)
             

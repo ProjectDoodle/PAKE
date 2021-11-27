@@ -18,9 +18,13 @@ Steps for running the sample Chat application:
 # To-Do
 1. Finish chat app implementation and print out communication for demonstration
 2. Apply DH and print out communication for demonstration
-3. Potentially create GUI for chat app
-4. Apply DH-EKE and print out communication for demonstration
+3. Apply DH-EKE and print out communication for demonstration
+4. Potentially create GUI for chat app
 5. Potentially apply "some" cryptanalysis on messages
+
+# Errors
+- IOError when client is receiving prime from server, probably because server expects to receive client data first
+- At the moment, the client is waiting to receive "step1" every iteration through the message loop, but it should only this information once. This means that after   	the first receipt of the DH variable information, there will be errors
 
 # Questions:
 1. Is DH used to generate a key between each client and the server? Or is it just used for key generation between clients?

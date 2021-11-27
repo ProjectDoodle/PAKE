@@ -28,6 +28,7 @@ username = my_username.encode('utf-8')
 username_header = f"{len(username):<{HEADER_LENGTH}}".encode('utf-8')
 client_socket.send(username_header + username)
 
+
 """
 #recieve connection message from server
 recv_msg = client_socket.recv(1024)
@@ -41,12 +42,21 @@ client_socket.send(send_msg)
 #receive and send message from/to different user/s
 """
 
+step1 = client_socket.recv(1024)
+print("Test")
+
 while True:
     message = input(f"{my_username} > ")
     
+    # if not emtpy
     if message:
         message = message.encode('utf-8')
         message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+
+        # Waiting for the server to send DH variables for key generation
+        #while True:
+        #print(client_socket.recv(4096).decode('utf-8'))
+        
         # Send message
         client_socket.send(message_header + message)
     
