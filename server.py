@@ -15,6 +15,8 @@ Steps from Source:
 import socket
 import select
 import json
+import hashlib
+import sys
 
 # Setting up the server
 IP = "127.0.0.1"
@@ -32,12 +34,25 @@ socket_list = []
 socket_list.append(server_socket)
 users = {}
 
+# SPEKE
+pwd = 3
+pwd_v2 = 34
+#s = hashlib.sha256(psswd.encode()).hexdigest()
+
 # DH variables
 server_secret = 4
 prime = 23
-generator = 9
+#generator = 9
+generator = pow(pwd_v2, 2)
 serverA = (pow(generator, server_secret)) % prime
+#serverA_e = serverA ^ psswd
 
+print("Server secret: " + str(server_secret))
+print("Prime: " + str(prime))
+print("Generator: " + str(generator))
+print("Server Public Key: " + str(serverA))
+print("Password: " + str(pwd))
+#print("Encrypted server public key: " + str(serverA_e))
 
 print(f"Listening for connections on {IP}:{PORT}...")
 
@@ -87,10 +102,14 @@ while True:
             jsonData = jsonData["dh-keyexchange"]
             
             clientB = int(jsonData["clientB"])
+
+            if (clientB < 2 or clientB > (prime-2)):
+                print("Possible small subgroup confinement attack. Aborting on server side.")
+                sys.exit(0)
             
             sharedSecret = pow(clientB, server_secret) % prime
            
-            #print("Server secret: " + str(sharedSecret))
+            print("Shared secret: " + str(sharedSecret))
 
             user = recv_msg(client_socket)
             # Someone disconnected

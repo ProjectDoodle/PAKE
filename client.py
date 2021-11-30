@@ -13,16 +13,33 @@ import select
 import errno
 import sys
 import json
+import hashlib
+"""
+from Crypto.Cipher import AES
+import hashlib
+from Crypto import Random
+from Crypto.Cipher import AES
+from base64 import b64encode, b64decode
+"""
 
 HEADER_LENGTH = 10
 IP = "127.0.0.1"
 PORT = 12345
 client_secret = 5
 
+# DH-EKE
+pwd = 3
+pwd_v2 = 34
+#s = hashlib.sha256(psswd.encode()).hexdigest()
+
 my_username = input("Username: ")
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #client_socket = socket.socket()
 client_socket.connect((IP, PORT))
+
+# Receiving encrypted A from server
+#serverA_e = client_socket.recv(1024)
+#print(serverA_e)
 
 # Receiving DH variables
 step1 = client_socket.recv(1024)
@@ -35,7 +52,16 @@ generator = int(jsonData["generator"])
 prime = int(jsonData["prime"])
 serverA = int(jsonData["serverA"])
 
-#print(f"Generator {generator}, prime {prime}, serverA {serverA}")
+
+print("Client secret: " + str(client_secret))
+print("Prime: " + str(prime))
+print("Generator: " + str(generator))
+print("Server Public Key: " + str(serverA))
+print("Password: " + str(pwd))
+
+if (serverA < 2 or serverA > (prime-2)):
+    print("Possible small subgroup confinement attack. Aborting on client side.")
+    sys.exit(0)
 
 # Calculating client shared secret
 clientB = (pow(generator, client_secret)) % prime
@@ -51,7 +77,7 @@ client_socket.send(step2.encode())
 
 # Calculating shared secret
 sharedSecret = pow(serverA, client_secret) % prime
-#print("Client secret: " + str(sharedSecret))
+print("Shared secret: " + str(sharedSecret))
 
 # Receive shouldn't block
 client_socket.setblocking(False)
@@ -62,7 +88,7 @@ client_socket.send(username_header + username)
 
 while True:
     message = input(f"{my_username} > ")
-    
+
     # if not emtpy
     if message:
         message = message.encode('utf-8')
