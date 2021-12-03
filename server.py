@@ -17,6 +17,7 @@ import select
 import json
 import hashlib
 import sys
+from Crypto.Cipher import AES
 
 # Setting up the server
 IP = "127.0.0.1"
@@ -34,7 +35,7 @@ socket_list = []
 socket_list.append(server_socket)
 users = {}
 
-# SPEKE
+# DH-SPEKE
 pwd = 3
 pwd_v2 = 34
 #s = hashlib.sha256(psswd.encode()).hexdigest()
@@ -42,17 +43,14 @@ pwd_v2 = 34
 # DH variables
 server_secret = 4
 prime = 23
-#generator = 9
 generator = pow(pwd_v2, 2)
 serverA = (pow(generator, server_secret)) % prime
-#serverA_e = serverA ^ psswd
 
 print("Server secret: " + str(server_secret))
 print("Prime: " + str(prime))
 print("Generator: " + str(generator))
 print("Server Public Key: " + str(serverA))
 print("Password: " + str(pwd))
-#print("Encrypted server public key: " + str(serverA_e))
 
 print(f"Listening for connections on {IP}:{PORT}...")
 
@@ -86,6 +84,7 @@ while True:
             # Bringing in the client connetion
             client_socket, client_address = server_socket.accept()
 
+            # Sending DH variables
             step1 = "{"
             step1 += "\"dh-keyexchange\":"
             step1 += "{"
@@ -107,6 +106,7 @@ while True:
                 print("Possible small subgroup confinement attack. Aborting on server side.")
                 sys.exit(0)
             
+            # Calculating shared secret
             sharedSecret = pow(clientB, server_secret) % prime
            
             print("Shared secret: " + str(sharedSecret))

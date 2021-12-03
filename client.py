@@ -14,6 +14,9 @@ import errno
 import sys
 import json
 import hashlib
+import random
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
 """
 from Crypto.Cipher import AES
 import hashlib
@@ -27,7 +30,7 @@ IP = "127.0.0.1"
 PORT = 12345
 client_secret = 5
 
-# DH-EKE
+# DH-SPEKE
 pwd = 3
 pwd_v2 = 34
 #s = hashlib.sha256(psswd.encode()).hexdigest()
@@ -37,13 +40,8 @@ client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #client_socket = socket.socket()
 client_socket.connect((IP, PORT))
 
-# Receiving encrypted A from server
-#serverA_e = client_socket.recv(1024)
-#print(serverA_e)
-
 # Receiving DH variables
 step1 = client_socket.recv(1024)
-#print("Test")
 
 # Parsing DH variables
 jsonData = json.loads(step1.decode())
@@ -93,6 +91,16 @@ while True:
     if message:
         message = message.encode('utf-8')
         message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+        
+        # We can pass in the shared secret from the key exchange here to an
+        # encryption algorithm like AES, but we're having issues using the 
+        # Python AES library at the moment.
+        """
+        key = sharedSecret.to_bytes(2, 'little')
+        pad(key, 16)
+        cipher = AES.new(key, AES.MODE_ECB)
+        message_e = cipher.encrypt(message)
+        """
         
         # Send message
         client_socket.send(message_header + message)
